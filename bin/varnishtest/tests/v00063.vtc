@@ -1,0 +1,16 @@
+varnishtest "Test VCL ssl backend parsing"
+
+varnish v1 -arg "-i foobar" -vcl {
+	import debug;
+	backend b { .host = "${bad_ip}"; .ssl=1; .ssl_sni=1; .ssl_sni_name="test.google.com"; .ssl_verify_peer=1; .ssl_verify_host = 1; }
+
+	sub vcl_recv {
+		return (synth(200));
+	}
+} -start
+
+client c1 {
+	txreq -url "/c1"
+	rxresp
+	expect resp.status == 200
+} -start

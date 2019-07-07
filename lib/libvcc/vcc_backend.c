@@ -299,6 +299,9 @@ vcc_ParseHostDef(struct vcc *tl, const struct token *t_be, const char *vgcname)
 	struct token *t_port = NULL;
 	struct token *t_path = NULL;
 	struct token *t_hosthdr = NULL;
+#ifdef USE_TLS
+	struct token *t_ssl_sni_name = NULL;
+#endif
 	struct symbol *pb;
 	struct token *t_did = NULL;
 	struct fld_spec *fs;
@@ -319,6 +322,13 @@ vcc_ParseHostDef(struct vcc *tl, const struct token *t_be, const char *vgcname)
 	    "?probe",
 	    "?max_connections",
 	    "?proxy_header",
+#ifdef USE_TLS
+		"?ssl",
+		"?ssl_sni",
+		"?ssl_sni_name",
+		"?ssl_verify_peer",
+		"?ssl_verify_host",
+#endif
 	    NULL);
 
 	SkipToken(tl, '{');
@@ -422,6 +432,35 @@ vcc_ParseHostDef(struct vcc *tl, const struct token *t_be, const char *vgcname)
 			}
 			SkipToken(tl, ';');
 			Fb(tl, 0, "\t.proxy_header = %u,\n", u);
+#ifdef USE_TLS
+		} else if (vcc_IdIs(t_field, "ssl_sni_name")) {
+			ExpectErr(tl, CSTR);
+			assert(tl->t->dec != NULL);
+			t_ssl_sni_name = tl->t;
+			Fb(tl, 0, "\t.ssl_sni_name = \"%s\",\n", t_ssl_sni_name->dec);
+			vcc_NextToken(tl);
+			SkipToken(tl, ';');
+		} else if (vcc_IdIs(t_field, "ssl")) {
+			u = vcc_UintVal(tl);
+			ERRCHK(tl);
+			SkipToken(tl, ';');
+			Fb(tl, 0, "\t.ssl = %u,\n", u);
+		} else if (vcc_IdIs(t_field, "ssl_sni")) {
+			u = vcc_UintVal(tl);
+			ERRCHK(tl);
+			SkipToken(tl, ';');
+			Fb(tl, 0, "\t.ssl_sni = %u,\n", u);
+		} else if (vcc_IdIs(t_field, "ssl_verify_peer")) {
+			u = vcc_UintVal(tl);
+			ERRCHK(tl);
+			SkipToken(tl, ';');
+			Fb(tl, 0, "\t.ssl_verify_peer = %u,\n", u);
+		} else if (vcc_IdIs(t_field, "ssl_verify_host")) {
+			u = vcc_UintVal(tl);
+			ERRCHK(tl);
+			SkipToken(tl, ';');
+			Fb(tl, 0, "\t.ssl_verify_host = %u,\n", u);
+#endif
 		} else if (vcc_IdIs(t_field, "probe") && tl->t->tok == '{') {
 			vcc_ParseProbeSpec(tl, NULL, &p);
 			Fb(tl, 0, "\t.probe = %s,\n", p);

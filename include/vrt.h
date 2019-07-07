@@ -52,6 +52,7 @@
  * binary/load-time compatible, increment MAJOR version
  *
  * unreleased (planned for 2019-09-15)
+ *  vrt_backend grew, added SSL fields
  *	VRT_synth_page now takes STRANDS argument
  *	VRT_hashdata() now takes STRANDS argument
  *	VCL_BOOL VRT_Strands2Bool(VCL_STRANDS) added.
@@ -335,7 +336,12 @@ extern const void * const vrt_magic_string_unset;
 	vtim_dur			first_byte_timeout;	\
 	vtim_dur			between_bytes_timeout;	\
 	unsigned			max_connections;	\
-	unsigned			proxy_header;
+	unsigned			proxy_header;	\
+	unsigned			ssl;	\
+	unsigned			ssl_sni;	\
+	rigid char			*ssl_sni_name;	\
+	unsigned			ssl_verify_peer;	\
+	unsigned			ssl_verify_host;	
 
 #define VRT_BACKEND_HANDLE()			\
 	do {					\
@@ -350,6 +356,11 @@ extern const void * const vrt_magic_string_unset;
 		DN(between_bytes_timeout);	\
 		DN(max_connections);		\
 		DN(proxy_header);		\
+		DN(ssl);		\
+		DN(ssl_sni);		\
+		DA(ssl_sni_name);		\
+		DN(ssl_verify_peer);		\
+		DN(ssl_verify_host);		\
 	} while(0)
 
 struct vrt_backend {

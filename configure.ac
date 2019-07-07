@@ -210,6 +210,22 @@ CURSES_LIBS="$CURSES_LIB"
 ])
 AC_SUBST([CURSES_LIBS])
 
+AC_ARG_ENABLE(tls,
+    AC_HELP_STRING([--enable-tls],
+		   [Enable TLS support for backend. (default is off)]),
+    [use_tls="$enableval"],
+    [use_tls=no])
+if test x"$use_tls" != xno; then
+  PKG_CHECK_MODULES([SSL], [libssl])
+  PKG_CHECK_MODULES([CRYPTO], [libcrypto])
+  AC_DEFINE(USE_TLS, 1,[Define to 1 if you want to allow backend TLS])
+  AC_SUBST(SSL_CFLAGS)
+  AC_SUBST(SSL_LIBS)
+  AC_SUBST(CRYPTO_CFLAGS)
+  AC_SUBST(CRYPTO_LIBS)
+fi
+AM_CONDITIONAL(USE_TLS, test xno != x"$use_tls")    
+
 AC_CHECK_HEADERS([ncursesw/curses.h ncursesw.h ncurses/curses.h ncurses.h curses.h])
 
 # Checks for header files.
